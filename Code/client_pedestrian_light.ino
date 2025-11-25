@@ -1,26 +1,58 @@
-// Include the required Wire library for I2C<br>#include <Wire.h>
-int LED = 0;
-int x = 0;
-int previous_x;
-void setup() {
-  // Define the LED pin as Output
-  pinMode (LED, OUTPUT);
-  // Start the I2C Bus as Slave on address 9
-  Wire.begin(9); 
-  // Attach a function to trigger when something is received.
+// Include the required Wire library for I2C<br>
+#include <Wire.h>
+enum Leds {
+  CAR_GREEN=11,
+  CAR_YELLOW=12,
+  CAR_RED=13,
+  PEDESTRIAN_GREEN=9,
+  PEDESTRIAN_RED=10
+};
+
+void setup()
+{
+  pinMode(PEDESTRIAN_GREEN, OUTPUT);
+  pinMode(PEDESTRIAN_RED, OUTPUT);
+  Wire.begin(9);
   Wire.onReceive(receiveEvent);
 }
-void receiveEvent(int bytes) {
-  x = Wire.read();    // read one character from the I2C
-}
-void loop() {
-  if(x != previous_x){
-    for(int i = 0; i<x; i++){
-      digitalWrite(LED, HIGH);
-      delay(200);
-      digitalWrite(LED, LOW);
-      delay(200);
-    }
+
+void switch_led(int led) {
+  switch (led) {
+    case CAR_GREEN:
+      digitalWrite(PEDESTRIAN_GREEN, 0);
+      digitalWrite(PEDESTRIAN_RED, 1);
+      break;
+    case CAR_YELLOW:
+      digitalWrite(PEDESTRIAN_GREEN, 0);
+      digitalWrite(PEDESTRIAN_RED, 1);
+      break;
+    case CAR_RED:
+      digitalWrite(PEDESTRIAN_GREEN, 0);
+      digitalWrite(PEDESTRIAN_RED, 1);
+      break;
+    case PEDESTRIAN_GREEN:
+      digitalWrite(PEDESTRIAN_GREEN, 1);
+      digitalWrite(PEDESTRIAN_RED, 0);
+      break;
+    case PEDESTRIAN_RED:
+      digitalWrite(PEDESTRIAN_GREEN, 0);
+      digitalWrite(PEDESTRIAN_RED, 1);
+      break;
   }
 
+}
+
+int state = 0;
+int previous_state = 0;
+
+void receiveEvent(int bytes) {
+  state = Wire.read();    // read one character from the I2C
+}
+
+void loop()
+{
+    if(state!= previous_state){
+      switch_led(state);
+      previous_state = state;
+    }
 }
